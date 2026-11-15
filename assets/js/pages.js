@@ -1,5 +1,5 @@
 /* NCDPC pages. Each block only runs on the page that has its markup.
-   Home: aperture intro and slideshow, event panels, counters. Photos: filter chips, grid and viewer. Panel: people. */
+   Home: curtain intro and slideshow, event panels, counters. Photos: filter chips, grid and viewer. Panel: people. */
 (function () {
   var N = window.NCD, $ = N.$, el = N.el, reduce = N.reduce, plural = N.plural;
   var page = document.body.dataset.page;
@@ -65,19 +65,8 @@
   function clearIntro() { root.classList.remove('intro'); }
   if (page === 'home') setTimeout(clearIntro, 6000); // a script failure must never leave the page hidden
 
-  function hexFrames(R, n) {
-    var clip = [], ring = [];
-    for (var k = 0; k <= n; k++) {
-      var t = k / n, e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, r = R * e, rot = -Math.PI / 6 * (1 - e) - Math.PI / 12, pts = [];
-      for (var q = 0; q < 6; q++) { var ang = rot + q * Math.PI / 3; pts.push('calc(50% + ' + (Math.cos(ang) * r).toFixed(1) + 'px) calc(50% + ' + (Math.sin(ang) * r).toFixed(1) + 'px)'); }
-      clip.push({ clipPath: 'polygon(' + pts.join(',') + ')' });
-      ring.push({ transform: 'rotate(' + rot.toFixed(4) + 'rad) scale(' + (e * R / 100).toFixed(4) + ')', opacity: t < .08 ? t / .08 : t > .85 ? Math.max(0, (1 - t) / .15) : 1 });
-    }
-    return { clip: clip, ring: ring };
-  }
-
   function hero(items) {
-    var box = $('.slides'), hero = box.parentNode, ring = $('.ring'), mark = $('.mark'), top = $('.top');
+    var box = $('.slides'), hero = box.parentNode, mark = $('.mark'), cw = $('.curtain'), top = $('.top');
     var SLIDE = 6500, TRANS = 2000, N_ = items.length, cur = 0, trans = null, segAnim = null, userPaused = false, autoPaused = false, playing = false;
     var intro = root.classList.contains('intro') && !reduce;
     var origins = ['50% 50%', '30% 60%', '70% 40%', '40% 30%', '60% 70%', '50% 40%'];
@@ -119,20 +108,13 @@
     }
     function finish() {
       if (!trans) return; var t = trans; trans = null;
-      t.a.cancel(); if (t.r) t.r.cancel();
+      t.a.cancel();
       t.inc.style.zIndex = 1; if (t.out) { t.out.style.visibility = 'hidden'; t.out.style.zIndex = 0; if (kens[t.oi]) kens[t.oi].cancel(); }
-    }
-    function reveal(inc, out, oi, dur) {
-      var r = box.getBoundingClientRect(), R = Math.hypot(r.width, r.height) / 2 * 1.1547 * 1.03, f = hexFrames(R, 32);
-      inc.style.visibility = 'visible'; inc.style.zIndex = 2; if (out) out.style.zIndex = 1;
-      var a = inc.animate(f.clip, { duration: dur, easing: 'linear', fill: 'both' }), rg = ring.animate(f.ring, { duration: dur, easing: 'linear', fill: 'both' });
-      trans = { inc: inc, out: out, oi: oi, a: a, r: rg };
-      a.onfinish = finish;
     }
     function blend(inc, out, oi, dur) { // soft cross-dissolve: the next photo fades in over the current one
       inc.style.visibility = 'visible'; inc.style.zIndex = 2; out.style.zIndex = 1;
       var a = inc.animate([{ opacity: 0 }, { opacity: 1 }], { duration: dur, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
-      trans = { inc: inc, out: out, oi: oi, a: a, r: null };
+      trans = { inc: inc, out: out, oi: oi, a: a };
       a.onfinish = finish;
     }
     function go(to) {
@@ -140,7 +122,7 @@
       finish();
       var from = cur; cur = to; label(); playing = true;
       if (reduce) { slides[from].style.visibility = 'hidden'; slides[to].style.visibility = 'visible'; slides[to].style.zIndex = 1; startSeg(); return; }
-      if (from === to) reveal(slides[to], null, from, TRANS); else blend(slides[to], slides[from], from, TRANS);
+      if (from === to) { slides[to].style.visibility = 'visible'; slides[to].style.zIndex = 1; } else blend(slides[to], slides[from], from, TRANS);
       ken(to); startSeg();
       var nx = new Image(); nx.src = items[(to + 1) % N_].src;
     }
@@ -161,7 +143,7 @@
     if (!reduce && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { autoPaused = !es[0].isIntersecting; if (playing) sync(); }, { threshold: 0.2 }).observe(hero);
     document.addEventListener('visibilitychange', function () { autoPaused = document.hidden; if (playing) sync(); });
 
-    /* start: plain, or with the aperture intro */
+    /* start: plain, or with the curtain intro */
     var lines = N.$$('.ln > span', hero), rest = N.$$('.hero-copy > :not(h1), .hctl', hero);
     if (!intro) { clearIntro(); go(0); return; }
     try { sessionStorage.setItem('ncdIntro', '1'); } catch (e) {}
@@ -169,17 +151,26 @@
     var m = [mark.querySelector('img'), mark.querySelector('span')];
     m[0].animate([{ opacity: 0, transform: 'scale(.8)' }, { opacity: 1, transform: 'none' }], { duration: 700, easing: N.ease, fill: 'both' });
     m[1].animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: 150, easing: N.ease, fill: 'both' });
-    setTimeout(function () {
+    var halves = N.$$('.cw-t, .cw-b', cw), line = $('.cw-l', cw), sh = 'cubic-bezier(.76,0,.24,1)';
+    function open() { // the curtains part and the first photo settles in
       cur = 0; playing = true; label();
-      mark.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, delay: 250, fill: 'both' });
-      reveal(slides[0], null, 0, 1500); ken(0); startSeg();
+      slides[0].style.visibility = 'visible'; slides[0].style.zIndex = 1;
+      halves.forEach(function (h, i) { h.animate([{ transform: 'none' }, { transform: 'translateY(' + (i ? 101 : -101) + '%)' }], { duration: 1300, easing: sh, fill: 'both' }); });
+      line.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'both' });
+      mark.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'both' });
+      slides[0].animate([{ transform: 'scale(1.3)' }, { transform: 'none' }], { duration: 2200, easing: N.ease, fill: 'both' });
+      ken(0); startSeg();
       setTimeout(function () {
         clearIntro();
         lines.forEach(function (s, i) { s.animate([{ transform: 'translateY(110%)' }, { transform: 'none' }], { duration: 1000, delay: i * 140, easing: N.ease, fill: 'both' }); });
         rest.forEach(function (n, i) { n.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: 350 + i * 90, easing: N.ease, fill: 'both' }); });
         if (top) top.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 700, delay: 500, fill: 'both' });
-      }, 1050);
-    }, wait + 700);
+      }, 900);
+    }
+    setTimeout(function () { // the brass line draws across the logo, then the curtains part
+      line.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 800, easing: sh, fill: 'both' });
+      setTimeout(open, 950);
+    }, wait + 600);
   }
 
   /* ================= PHOTOS ================= */
