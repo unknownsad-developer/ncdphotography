@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NCD Photography Club</title>
+<meta name="description" content="Photography club at Noubahini College Dhaka. We meet every Thursday. Beginners and phone photographers welcome.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#050D24">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/adventor-bold.woff" as="font" type="font/woff" crossorigin>
+<script>(function(){var t=null;try{t=localStorage.getItem('ncd-theme')}catch(e){}document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+<script>(function(){try{if(!sessionStorage.getItem('ncdIntro')&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash)document.documentElement.classList.add('intro')}catch(e){}})();</script>
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="home">
+<a class="skip" href="#main">Skip to main content</a>
+<header class="top over">
+  <div class="wrap bar">
+    <a class="brand" href="index.html" aria-label="NCD Photography Club, home"><img src="assets/logo.png" width="40" height="40" alt=""><span>NCD Photography Club</span></a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="photos.html">Photos</a>
+      <a href="panel.html">Panel</a>
+      <a href="contact.html">Contact</a>
+      <a class="btn" href="join.html">Join the club</a>
+      <button class="theme" id="theme" type="button" aria-label="Switch appearance" title="Switch appearance"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" aria-label="Welcome">
+  <div class="slides" id="slides"></div>
+  <svg class="ring" width="200" height="200" viewBox="-100 -100 200 200" style="margin:-100px 0 0 -100px;opacity:0" aria-hidden="true" focusable="false"><polygon points="100,0 50,86.6 -50,86.6 -100,0 -50,-86.6 50,-86.6" fill="none" stroke="#D9A93B" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+  <div class="mark" aria-hidden="true"><img src="assets/logo.png" width="72" height="72" alt=""><span>NCD Photography Club</span></div>
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <h1 class="display"><span class="ln"><span>We meet on Thursdays</span></span> <span class="ln"><span>and take photographs.</span></span></h1>
+      <p class="lead">NCD Photography Club at Noubahini College Dhaka. Phones are welcome, and joining costs nothing.</p>
+      <div class="actions">
+        <a class="btn" href="join.html">Join the club</a>
+        <a class="pill" href="photos.html">See the photos</a>
+      </div>
+      <p class="fine">Membership for 2026/27 is open.</p>
+    </div>
+    <div class="hctl">
+      <p class="hcap" aria-live="off"><a href="photos.html">Latest photos</a><span></span></p>
+      <div class="segs"></div>
+      <div class="hbtns">
+        <button class="cbtn" id="hPrev" type="button" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+        <button class="cbtn" id="hPause" type="button" aria-label="Pause slideshow" aria-pressed="false"><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10-6.5a1 1 0 0 0 0-1.72l-10-6.5A1 1 0 0 0 8 5.5z"/></svg></button>
+        <button class="cbtn" id="hNext" type="button" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap say">
+    <p class="say-text">We're a photography club at Noubahini College Dhaka, started in 2016. Beginners, phone photographers and people with serious cameras all shoot together.</p>
+    <p class="say-count">Our archive so far: <b data-n="events">4</b> <span data-w="events">events</span>, <b data-n="photos">46</b> <span data-w="photos">photos</span>.</p>
+  </div>
+</section>
+
+<section class="block" id="events" style="padding-top:0">
+  <div class="wrap">
+    <div class="head">
+      <h2>Events</h2>
+      <a class="textlink" id="seeAll" href="photos.html" hidden>See all photos</a>
+    </div>
+    <div class="stack" id="stack"></div>
+  </div>
+</section>
+
+<section class="block" style="padding-top:0">
+  <div class="wrap">
+    <div class="head"><h2>What we do</h2></div>
+    <div class="rows">
+      <div><h3>Club Day, every Thursday</h3><p>We meet in the club room in the main building. We go through technique, composition and lighting, then take on a photography challenge together.</p></div>
+      <div><h3>Photo walks</h3><p>Bring any camera. If you are new, you walk with someone who has been shooting longer.</p></div>
+      <div><h3>Critique nights</h3><p>Members bring photos to talk about. New members pick up their member card at the next one.</p></div>
+      <div><h3>Workshops and the exhibition</h3><p>We teach composition and light before gear, and members lend each other lenses and tripods. Each year we hold an exhibition.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" style="padding-top:0">
+  <div class="wrap faq">
+    <h2>Questions people ask first</h2>
+    <div class="qa">
+      <details><summary>Do I need a real camera?</summary><p>No. A phone is fine for most walks and critiques. Lenses and tripods get passed around between members, and we start with composition and light before talking about gear.</p></details>
+      <details><summary>What does it cost?</summary><p>Nothing. Membership is free, and there are no annual or hidden fees.</p></details>
+      <details><summary>I have never taken a serious photo. Is that a problem?</summary><p>No. Most members started the same way, and on walks you are paired with someone more experienced.</p></details>
+      <details><summary>When do you meet?</summary><p>On Thursdays, in the club room in the main building. We call it Club Day.</p></details>
+      <details><summary>Who owns the photos you show?</summary><p>The photographer does. We ask before using anyone's photo on this site, in print or on social media.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <img id="ctaImg" alt="" hidden>
+  <div class="wrap">
+    <div class="cta-in">
+      <h2>Come to the next photo walk.</h2>
+      <p>Fill in the short application form. We reply within a few days with the date.</p>
+      <div class="actions"><a class="btn" href="join.html">Apply to join</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div>
+      <span class="foot-name">NCD Photography Club</span>
+      <small>Noubahini College Dhaka, since 2016</small>
+      <small>© 2026 NCD Photography Club</small>
+    </div>
+    <div>
+      <h4>Pages</h4>
+      <a href="photos.html">Photos</a><a href="panel.html">Panel</a><a href="contact.html">Contact</a>
+    </div>
+    <div>
+      <h4>Find us</h4>
+      <a href="https://www.facebook.com/profile.php?id=61572156817707" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg><span>NCD Photography Club</span></a>
+      <a href="https://www.instagram.com/ncdphotographyclub/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><span>@ncdphotographyclub</span></a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/events.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/motion.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>
