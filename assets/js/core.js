@@ -2,6 +2,7 @@
    PHOTOS: each folder in assets/photos is one event. On GitHub Pages the site reads the folder list
    from your repository, so dragging a new folder into assets/photos is enough. Anywhere else
    (including a local preview) it uses the list in assets/js/events.js.
+   SLIDESHOW: every picture in assets/slideshow is shown on the home page slideshow, in name order.
    Name a folder "2026-02-21 Mother language day" to give the event a date. */
 (function () {
   var BASE = 'assets/photos/', IMG = /\.(jpe?g|png|webp|gif|avif)$/i, root = document.documentElement;
@@ -62,10 +63,10 @@
     // custom domain: set NCD_GITHUB in assets/js/events.js
     return c && c.owner && c.repo && !/^(localhost|127\.|\[::1\])/.test(location.hostname) && location.protocol !== 'file:' ? c : null;
   }
-  function fromGithub(g) {
+  function treePaths(g) { // every file path in the repository (cached briefly so one page load asks GitHub once)
     var key = 'ncd-tree-' + g.owner + '/' + g.repo, cached = null;
     try { cached = JSON.parse(sessionStorage.getItem(key)); } catch (e) {}
-    var paths = cached && Date.now() - cached.t < 120000 ? Promise.resolve(cached.p)
+    return cached && Date.now() - cached.t < 120000 ? Promise.resolve(cached.p)
       : fetch('https://api.github.com/repos/' + g.owner + '/' + g.repo + '/git/trees/HEAD?recursive=1')
         .then(function (r) { if (!r.ok) throw new Error('github ' + r.status); return r.json(); })
         .then(function (j) {
@@ -73,7 +74,9 @@
           try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), p: p })); } catch (e) {}
           return p;
         });
-    return paths.then(function (all) {
+  }
+  function fromGithub(g) {
+    return treePaths(g).then(function (all) {
       var byDir = {};
       all.forEach(function (p) {
         if (p.indexOf(BASE) !== 0) return;
@@ -92,5 +95,21 @@
       events = (g ? fromGithub(g) : Promise.reject()).catch(function () { return build(window.NCD_MANIFEST || {}); });
     }
     return events;
+  };
+
+  /* home page slideshow: every picture inside assets/slideshow/, in name order (01, 02, 03 ...) */
+  var SLIDE_BASE = 'assets/slideshow/', slides = null;
+  N.getSlides = function () {
+    if (!slides) {
+      var g = githubTarget();
+      slides = (g ? treePaths(g).then(function (all) {
+        return all.filter(function (p) { return p.indexOf(SLIDE_BASE) === 0 && p.slice(SLIDE_BASE.length).indexOf('/') < 0; })
+          .map(function (p) { return p.slice(SLIDE_BASE.length); });
+      }) : Promise.reject()).catch(function () { return window.NCD_SLIDESHOW || []; }).then(function (files) {
+        return files.filter(function (f) { return IMG.test(f) && f.charAt(0) !== '.'; }).sort(natural)
+          .map(function (f) { return SLIDE_BASE + encodeURIComponent(f); });
+      });
+    }
+    return slides;
   };
 })();

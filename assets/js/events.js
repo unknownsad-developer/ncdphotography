@@ -59,3 +59,7 @@ window.NCD_MANIFEST = {
     "ncdphotographyclub-post-DdrW2_pEk5l-11.webp"
   ]
 };
+
+/* Slideshow pictures on the home page (same rule: only needed off GitHub Pages).
+   List the file names inside assets/slideshow/ here. */
+window.NCD_SLIDESHOW = ["01.webp", "02.webp", "03.webp", "04.jpg", "05.webp", "06.webp"];

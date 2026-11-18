@@ -7,6 +7,12 @@ Plain HTML, CSS and JavaScript. No build step, no installs.
 2. Repository Settings, Pages, deploy from the `main` branch, root folder.
 3. Open the address GitHub shows. It is detected automatically.
 
+## Home page slideshow
+Put the pictures you want in the home page slideshow into the `assets/slideshow/` folder.
+They play in name order, so name them `01.jpg`, `02.jpg`, `03.jpg` and so on.
+To remove a picture from the slideshow, delete it from that folder. If the folder is empty, the site picks photos from the events automatically.
+On GitHub Pages nothing else needs editing. On any other host, also list the file names in `assets/js/events.js` (`NCD_SLIDESHOW`).
+
 ## Add photos
 Make a new folder inside `assets/photos/`. Each folder is one event and its name is the event title.
 Start the folder name with a date to set the order, for example `2026-03-14 Spring photo walk`.

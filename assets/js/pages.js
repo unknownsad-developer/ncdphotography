@@ -17,7 +17,8 @@
   var pick = function (ev, i) { return ev.photos[i] || ev.photos[0]; }; // photo 0 is often a title card, so skip it where we can
 
   /* ================= HOME ================= */
-  if (page === 'home') N.getEvents().then(function (list) {
+  if (page === 'home') Promise.all([N.getEvents(), N.getSlides().catch(function () { return []; })]).then(function (res) {
+    var list = res[0], slideFiles = res[1];
     var total = list.reduce(function (n, e) { return n + e.photos.length; }, 0);
 
     /* archive counters (the markup already holds the build-time numbers, used when scripts are off) */
@@ -29,14 +30,9 @@
 
     /* hero pictures: round robin across events, starting at each event's second photo */
     var items = [], round = 1;
-    /* photos chosen by hand in assets/js/slideshow.js take priority */
-    (window.NCD_SLIDES || []).forEach(function (s) {
-      if (!s || !s.folder || !s.file) return;
-      var ev = list.filter(function (e) { return e.slug === s.folder; })[0]; if (!ev) return;
-      var src = ev.photos.filter(function (u) { try { return decodeURIComponent(u.split('/').pop()) === s.file; } catch (e) { return false; } })[0];
-      if (src) items.push({ ev: s.caption || s.link ? { title: s.caption || ev.title, slug: ev.slug, href: s.link } : ev, src: src });
-    });
-    /* otherwise: round robin across events */
+    /* the slideshow folder (assets/slideshow) takes priority */
+    slideFiles.forEach(function (src) { items.push({ ev: { title: 'Latest photos', slug: '', href: 'photos.html' }, src: src }); });
+    /* if that folder is empty: round robin across events */
     while (!items.length && items.length < 6 && round < 8) {
       list.forEach(function (ev) { if (items.length < 6 && ev.photos[round]) items.push({ ev: ev, src: ev.photos[round] }); });
       round++;
