@@ -4,7 +4,7 @@
    formUrl: the Google Form link. Leave it empty until the form exists.
    sample: true shows a notice that the photos are stand-ins. Delete that line when real entries go in. */
 window.EXHIBITION = {
-  "formUrl": "",
+  "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSeXPmIEDwzG20LI3ZRzvFDP0CFSW2ncX94FyHkc91pkClsDpg/viewform",
   "sample": true,
   "closing": "24th",
   "months": [
