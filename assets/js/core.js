@@ -99,15 +99,29 @@
 
   /* home page slideshow: every picture inside assets/slideshow/, in name order (01, 02, 03 ...) */
   var SLIDE_BASE = 'assets/slideshow/', slides = null;
-  N.getSlides = function () {
+  function slideCaptions() { // assets/slideshow/captions.txt: one "file name | caption" per line
+    return fetch(SLIDE_BASE + 'captions.txt', { cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error('no captions'); return r.text(); })
+      .then(function (t) {
+        var m = {};
+        t.replace(/^﻿/, '').split(/\r?\n/).forEach(function (line) {
+          var i = line.indexOf('|'); if (i < 1 || /^\s*#/.test(line)) return;
+          var k = line.slice(0, i).trim().toLowerCase(), v = line.slice(i + 1).trim(); if (k && v) m[k] = v;
+        });
+        return m;
+      }).catch(function () { return {}; });
+  }
+  N.getSlides = function () { // -> [{ src, caption }]
     if (!slides) {
       var g = githubTarget();
-      slides = (g ? treePaths(g).then(function (all) {
+      slides = Promise.all([(g ? treePaths(g).then(function (all) {
         return all.filter(function (p) { return p.indexOf(SLIDE_BASE) === 0 && p.slice(SLIDE_BASE.length).indexOf('/') < 0; })
           .map(function (p) { return p.slice(SLIDE_BASE.length); });
-      }) : Promise.reject()).catch(function () { return window.NCD_SLIDESHOW || []; }).then(function (files) {
-        return files.filter(function (f) { return IMG.test(f) && f.charAt(0) !== '.'; }).sort(natural)
-          .map(function (f) { return SLIDE_BASE + encodeURIComponent(f); });
+      }) : Promise.reject()).catch(function () { return window.NCD_SLIDESHOW || []; }), slideCaptions()]).then(function (r) {
+        return r[0].filter(function (f) { return IMG.test(f) && f.charAt(0) !== '.'; }).sort(natural).map(function (f) {
+          var k = f.toLowerCase();
+          return { src: SLIDE_BASE + encodeURIComponent(f), caption: r[1][k] || r[1][k.replace(IMG, '')] || '' };
+        });
       });
     }
     return slides;

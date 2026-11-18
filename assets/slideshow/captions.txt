@@ -1,0 +1,11 @@
+# Captions for the home page slideshow.
+# One line per photo:   file name | caption
+# You can write the file name with or without the extension (01.webp or just 01).
+# A photo with no line here shows "Latest photos". Lines starting with # are ignored.
+
+01.webp | Nobinboron HSC-28
+02.webp | NCD ANNUAL SPORTS 2026 — DAY 1
+03.webp | Mother Language Day 2026
+04.jpg | Closing Ceremony of Science Fest 2026
+05.webp | Nobinboron HSC-28
+06.webp | NCD ANNUAL SPORTS 2026 — DAY 1

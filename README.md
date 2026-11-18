@@ -10,6 +10,7 @@ Plain HTML, CSS and JavaScript. No build step, no installs.
 ## Home page slideshow
 Put the pictures you want in the home page slideshow into the `assets/slideshow/` folder.
 They play in name order, so name them `01.jpg`, `02.jpg`, `03.jpg` and so on.
+To write a caption for a picture, add a line to `assets/slideshow/captions.txt`, like `01.jpg | My caption`. A picture with no line shows "Latest photos".
 To remove a picture from the slideshow, delete it from that folder. If the folder is empty, the site picks photos from the events automatically.
 On GitHub Pages nothing else needs editing. On any other host, also list the file names in `assets/js/events.js` (`NCD_SLIDESHOW`).
 

@@ -31,7 +31,7 @@
     /* hero pictures: round robin across events, starting at each event's second photo */
     var items = [], round = 1;
     /* the slideshow folder (assets/slideshow) takes priority */
-    slideFiles.forEach(function (src) { items.push({ ev: { title: 'Latest photos', slug: '', href: 'photos.html' }, src: src }); });
+    slideFiles.forEach(function (s) { items.push({ ev: { title: s.caption || 'Latest photos', slug: '', href: 'photos.html' }, src: s.src }); });
     /* if that folder is empty: round robin across events */
     while (!items.length && items.length < 6 && round < 8) {
       list.forEach(function (ev) { if (items.length < 6 && ev.photos[round]) items.push({ ev: ev, src: ev.photos[round] }); });
