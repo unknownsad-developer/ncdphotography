@@ -255,6 +255,30 @@ dialog.lb[open]{display:block}
 .steps li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:var(--s3);align-items:baseline;padding-block:var(--s6);border-bottom:1px solid var(--line);counter-increment:s}
 .steps li::before{content:counter(s);font:700 2rem/1 var(--f-display);color:var(--accent-text)}
 
+/* ===== exhibition ===== */
+body[data-page="exhibition"] .page-head .wrap{gap:var(--s4)}
+body[data-page="exhibition"] .page-head h1{font-size:clamp(2.5rem,6vw,4.5rem)}
+@media (min-width:768px){body[data-page="exhibition"] .page-head{padding-top:calc(var(--hdr) + var(--s16))}}
+.xnote{max-width:60ch;padding-left:var(--s4);border-left:2px solid var(--accent);color:var(--muted);font-size:var(--sm)}
+.head .count{margin:0}
+.xwin{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s8);align-items:start}
+@media (min-width:900px){.xwin{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--s12);align-items:center}}
+.xwin .shot{margin:0;border-radius:4px}
+.xwin .shot img{max-height:min(78vh,820px);object-fit:contain;margin-inline:auto}
+.xwin-txt{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s3);padding-top:var(--s6);border-top:2px solid var(--accent);min-width:0}
+.potm{display:inline-flex;align-items:center;gap:var(--s2);color:var(--accent-text);font:500 var(--sm)/1.2 var(--f-body)}
+.potm svg{width:16px;height:16px;fill:currentColor;stroke:none}
+.xwin-txt h2{font-size:clamp(1.75rem,3.6vw,2.75rem);overflow-wrap:anywhere}
+.xmonth,.xmeta{color:var(--muted);font-size:var(--sm)}
+.xby{font-weight:500}
+.xstory{color:var(--muted);max-width:46ch}
+.xwin-none{color:var(--muted);padding-block:var(--s8)}
+.xfig{margin:0 0 var(--s6);break-inside:avoid}
+.xfig .shot{margin:0 0 var(--s2)}
+.xfig figcaption{display:flex;flex-direction:column;font-size:var(--sm);color:var(--muted)}
+.xfig figcaption b{font-weight:500;color:var(--text)}
+.xtag{color:var(--accent-text);font-weight:500}
+
 /* ===== footer ===== */
 .foot{background:var(--surface);border-top:1px solid var(--line);padding-block:var(--s12)}
 .foot-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s8) var(--s12)}

@@ -16,6 +16,67 @@
   };
   var pick = function (ev, i) { return ev.photos[i] || ev.photos[0]; }; // photo 0 is often a title card, so skip it where we can
 
+  /* ---- photo viewer, shared by Photos and Exhibition: the photo grows out of its thumbnail and goes back to it ---- */
+  function makeViewer() {
+    var d = null, vimg, cap, num, idx = 0, busy = false, flat = [], thumbs = [];
+    function ensure() {
+      if (d) return;
+      d = el('dialog', 'lb'); d.setAttribute('aria-label', 'Photo viewer');
+      d.innerHTML = '<button class="pill lb-close" type="button" data-x>Close</button><div class="lb-stage"><img alt=""></div>' +
+        '<div class="lb-bar"><p class="lb-cap" aria-live="polite"><b></b><span></span></p><div class="lb-btns">' +
+        '<button class="cbtn" type="button" data-d="-1" aria-label="Previous photo">' + ICON.prev + '</button><button class="cbtn" type="button" data-d="1" aria-label="Next photo">' + ICON.next + '</button></div></div>';
+      document.body.appendChild(d);
+      vimg = $('img', d); cap = $('b', d); num = $('.lb-cap span', d);
+      d.addEventListener('click', function (e) {
+        if (e.target.closest('[data-x]') || e.target === d || e.target.classList.contains('lb-stage')) close();
+        else { var b = e.target.closest('[data-d]'); if (b) step(+b.dataset.d); }
+      });
+      d.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
+      d.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') step(-1); else if (e.key === 'ArrowRight') step(1); });
+      var x0 = null;
+      d.addEventListener('touchstart', function (e) { x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+      d.addEventListener('touchend', function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1); });
+      d.addEventListener('close', function () { vimg.removeAttribute('src'); root.style.overflow = ''; busy = false; });
+    }
+    function fill() {
+      var p = flat[idx]; vimg.src = p.src; vimg.alt = p.alt || p.title + ', photo ' + (p.i + 1) + ' of ' + p.n;
+      cap.textContent = p.title; num.textContent = (idx + 1) + ' / ' + flat.length + (p.by ? ', photo by ' + p.by : '');
+      $('[data-d="-1"]', d).hidden = $('[data-d="1"]', d).hidden = flat.length < 2;
+    }
+    function from(a, b) { // transform that puts rect b's box where rect a is
+      return 'translate(' + (a.left - b.left).toFixed(1) + 'px,' + (a.top - b.top).toFixed(1) + 'px) scale(' + (a.width / b.width).toFixed(4) + ',' + (a.height / b.height).toFixed(4) + ')';
+    }
+    function viewer(list, ths, k, thumb) {
+      flat = list; thumbs = ths; ensure(); idx = k; fill(); root.style.overflow = 'hidden'; d.showModal();
+      if (reduce) return;
+      var a = thumb.getBoundingClientRect(), go = function () {
+        var b = vimg.getBoundingClientRect(); if (!b.width) return;
+        vimg.style.transformOrigin = '0 0';
+        vimg.animate([{ transform: from(a, b) }, { transform: 'none' }], { duration: 520, easing: N.ease }).onfinish = function () { vimg.style.transformOrigin = ''; };
+        $('.lb-bar', d).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 220, fill: 'backwards' });
+      };
+      (vimg.decode ? vimg.decode().then(go, go) : go());
+    }
+    function step(s) {
+      if (flat.length < 2) return;
+      idx = (idx + s + flat.length) % flat.length; fill();
+      if (!reduce) vimg.animate([{ opacity: 0, transform: 'translateX(' + (s * 24) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: N.ease });
+    }
+    function close() {
+      if (busy) return;
+      var t = thumbs[idx];
+      if (reduce || !t) { d.close(); return; }
+      busy = true; t.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      var a = t.getBoundingClientRect(), b = vimg.getBoundingClientRect(), vis = a.bottom > 0 && a.top < innerHeight;
+      vimg.style.transformOrigin = '0 0';
+      var anim = vis ? vimg.animate([{ transform: 'none' }, { transform: from(a, b) }], { duration: 380, easing: 'cubic-bezier(.7,0,.84,0)', fill: 'forwards' })
+                     : vimg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
+      $('.lb-bar', d).animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' });
+      anim.onfinish = function () { d.close(); vimg.style.transformOrigin = ''; anim.cancel(); };
+    }
+    return viewer;
+  }
+
   /* ================= HOME ================= */
   if (page === 'home') Promise.all([N.getEvents(), N.getSlides().catch(function () { return []; })]).then(function (res) {
     var list = res[0], slideFiles = res[1];
@@ -180,7 +241,7 @@
   /* ================= PHOTOS ================= */
   if (page === 'photos') N.getEvents().then(function (list) {
     var chips = $('#chips'), grid = $('#grid'), count = $('#count'), title = document.title;
-    var thumbs = [], flat = [], active = null;
+    var thumbs = [], flat = [], active = null, openViewer = makeViewer();
     var total = list.reduce(function (n, e) { return n + e.photos.length; }, 0);
 
     function chip(slug, text, n) {
@@ -202,71 +263,74 @@
         var b = el('button', 'shot'); b.type = 'button'; b.setAttribute('aria-label', 'Open photo from ' + p.title + ', ' + (p.i + 1) + ' of ' + p.n);
         var img = new Image(); img.alt = ''; img.decoding = 'async'; if (k > 11) img.loading = 'lazy'; img.src = p.src;
         b.appendChild(img); grid.appendChild(b); thumbs.push(img);
-        b.addEventListener('click', function () { viewer(k, img); });
+        b.addEventListener('click', function () { openViewer(flat, thumbs, k, img); });
         N.develop(img, (k % 8) * 70);
       });
     }
     select(hash());
     window.addEventListener('hashchange', function () { select(hash()); });
-
-    /* ---- viewer: the photo grows out of its thumbnail and goes back to it ---- */
-    var d = null, vimg, cap, num, idx = 0, busy = false;
-    function ensure() {
-      if (d) return;
-      d = el('dialog', 'lb'); d.setAttribute('aria-label', 'Photo viewer');
-      d.innerHTML = '<button class="pill lb-close" type="button" data-x>Close</button><div class="lb-stage"><img alt=""></div>' +
-        '<div class="lb-bar"><p class="lb-cap" aria-live="polite"><b></b><span></span></p><div class="lb-btns">' +
-        '<button class="cbtn" type="button" data-d="-1" aria-label="Previous photo">' + ICON.prev + '</button><button class="cbtn" type="button" data-d="1" aria-label="Next photo">' + ICON.next + '</button></div></div>';
-      document.body.appendChild(d);
-      vimg = $('img', d); cap = $('b', d); num = $('.lb-cap span', d);
-      d.addEventListener('click', function (e) {
-        if (e.target.closest('[data-x]') || e.target === d || e.target.classList.contains('lb-stage')) close();
-        else { var b = e.target.closest('[data-d]'); if (b) step(+b.dataset.d); }
-      });
-      d.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
-      d.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') step(-1); else if (e.key === 'ArrowRight') step(1); });
-      var x0 = null;
-      d.addEventListener('touchstart', function (e) { x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
-      d.addEventListener('touchend', function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1); });
-      d.addEventListener('close', function () { vimg.removeAttribute('src'); root.style.overflow = ''; busy = false; });
-    }
-    function fill() {
-      var p = flat[idx]; vimg.src = p.src; vimg.alt = p.title + ', photo ' + (p.i + 1) + ' of ' + p.n;
-      cap.textContent = p.title; num.textContent = (idx + 1) + ' / ' + flat.length;
-      $('[data-d="-1"]', d).hidden = $('[data-d="1"]', d).hidden = flat.length < 2;
-    }
-    function from(a, b) { // transform that puts rect b's box where rect a is
-      return 'translate(' + (a.left - b.left).toFixed(1) + 'px,' + (a.top - b.top).toFixed(1) + 'px) scale(' + (a.width / b.width).toFixed(4) + ',' + (a.height / b.height).toFixed(4) + ')';
-    }
-    function viewer(k, thumb) {
-      ensure(); idx = k; fill(); root.style.overflow = 'hidden'; d.showModal();
-      if (reduce) return;
-      var a = thumb.getBoundingClientRect(), go = function () {
-        var b = vimg.getBoundingClientRect(); if (!b.width) return;
-        vimg.style.transformOrigin = '0 0';
-        vimg.animate([{ transform: from(a, b) }, { transform: 'none' }], { duration: 520, easing: N.ease }).onfinish = function () { vimg.style.transformOrigin = ''; };
-        $('.lb-bar', d).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 220, fill: 'backwards' });
-      };
-      (vimg.decode ? vimg.decode().then(go, go) : go());
-    }
-    function step(s) {
-      if (flat.length < 2) return;
-      idx = (idx + s + flat.length) % flat.length; fill();
-      if (!reduce) vimg.animate([{ opacity: 0, transform: 'translateX(' + (s * 24) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: N.ease });
-    }
-    function close() {
-      if (busy) return;
-      var t = thumbs[idx];
-      if (reduce || !t) { d.close(); return; }
-      busy = true; t.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-      var a = t.getBoundingClientRect(), b = vimg.getBoundingClientRect(), vis = a.bottom > 0 && a.top < innerHeight;
-      vimg.style.transformOrigin = '0 0';
-      var anim = vis ? vimg.animate([{ transform: 'none' }, { transform: from(a, b) }], { duration: 380, easing: 'cubic-bezier(.7,0,.84,0)', fill: 'forwards' })
-                     : vimg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
-      $('.lb-bar', d).animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' });
-      anim.onfinish = function () { d.close(); vimg.style.transformOrigin = ''; anim.cancel(); };
-    }
   });
+
+  /* ================= EXHIBITION ================= */
+  if (page === 'exhibition' && window.EXHIBITION) (function () {
+    var X = window.EXHIBITION, months = X.months || [], openViewer = makeViewer();
+    var chips = $('#xchips'), feat = $('#feature'), grid = $('#xgrid'), count = $('#xcount'), chipEls = [], title = document.title;
+    var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.2l7.1-.6z"/></svg>';
+    var src = function (p) { return /^(https?:)?\//.test(p) ? p : encodeURI(p); };
+    var who = function (p) { return p.by ? p.by + (p.class ? ', ' + p.class : '') : ''; };
+
+    if (X.closing) $('#xclose').textContent = 'The ' + X.closing + ' of each month';
+    [].forEach.call(document.querySelectorAll('[data-send]'), function (a) { if (X.formUrl) { a.href = X.formUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; } });
+    if (!X.formUrl) { var f = $('#xform'); f.hidden = false; f.textContent = 'The submission form link will be added here when the form is ready.'; }
+    if (X.sample) { var n = $('#xnote'); n.hidden = false; n.textContent = 'Preview content: these are photos from our events, standing in for member entries until the first month opens.'; }
+
+    if (!months.length) { feat.appendChild(el('p', 'xwin-none', 'The first month of entries opens soon.')); return; }
+    months.forEach(function (m) {
+      var b = el('button', 'chip', m.label); b.type = 'button'; b.dataset.id = m.id;
+      b.addEventListener('click', function () { select(m.id); try { history.replaceState(null, '', '#m=' + encodeURIComponent(m.id)); } catch (e) {} });
+      chips.appendChild(b); chipEls.push(b);
+    });
+    var want = function () { var r = /(?:^#|&)m=([^&]*)/.exec(location.hash); try { return r ? decodeURIComponent(r[1]) : ''; } catch (e) { return ''; } };
+
+    function select(id) {
+      var m = months.filter(function (x) { return x.id === id; })[0] || months[0];
+      chipEls.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.id === m.id ? 'true' : 'false'); });
+      document.title = m.label + ' | Exhibition | NCD Photography Club';
+      feat.textContent = ''; grid.textContent = '';
+      var all = m.photos || [], win = all.filter(function (p) { return p.rank === 'winner'; })[0], rest = all.filter(function (p) { return p !== win; });
+      var flat = [], thumbs = [];
+      function add(p, i, n) { flat.push({ src: src(p.src), title: p.title, by: who(p), alt: p.title + ', photo by ' + (p.by || 'a member') }); }
+      if (win) add(win);
+      rest.forEach(function (p) { add(p); });
+      count.textContent = m.label + ': ' + plural(all.length, 'photo', 'photos');
+
+      if (win) {
+        var box = el('div', 'xwin'), wb = el('button', 'shot'); wb.type = 'button'; wb.setAttribute('aria-label', 'Open the Picture of the month: ' + win.title);
+        var wi = new Image(); wi.alt = ''; wi.decoding = 'async'; wi.src = src(win.src); wb.appendChild(wi); thumbs.push(wi);
+        wb.addEventListener('click', function () { openViewer(flat, thumbs, 0, wi); });
+        var t = el('div', 'xwin-txt'), pl = el('p', 'potm'); pl.innerHTML = STAR; pl.appendChild(document.createTextNode('Picture of the month'));
+        t.appendChild(pl); t.appendChild(el('h2', null, win.title)); t.appendChild(el('p', 'xmonth', m.label));
+        if (who(win)) t.appendChild(el('p', 'xby', 'Photo by ' + who(win)));
+        if (win.story) t.appendChild(el('p', 'xstory', win.story));
+        if (win.camera) t.appendChild(el('p', 'xmeta', 'Shot on ' + win.camera));
+        if (win.full) { var fl = el('a', 'textlink', 'View the full-quality original'); fl.href = win.full; fl.target = '_blank'; fl.rel = 'noopener noreferrer'; t.appendChild(fl); }
+        box.appendChild(wb); box.appendChild(t); feat.appendChild(box);
+        N.develop(wi, 0);
+      } else feat.appendChild(el('p', 'xwin-none', 'The Picture of the month for ' + m.label + ' will be announced on the 1st.'));
+
+      rest.forEach(function (p, i) {
+        var fg = el('figure', 'xfig'), b = el('button', 'shot'); b.type = 'button'; b.setAttribute('aria-label', 'Open ' + p.title + (p.by ? ', photo by ' + p.by : ''));
+        var im = new Image(); im.alt = ''; im.decoding = 'async'; if (i > 8) im.loading = 'lazy'; im.src = src(p.src); b.appendChild(im); thumbs.push(im);
+        var k = (win ? 1 : 0) + i; b.addEventListener('click', function () { openViewer(flat, thumbs, k, im); });
+        var cp = el('figcaption'); cp.appendChild(el('b', null, p.title)); if (p.by) cp.appendChild(el('span', null, p.by));
+        if (p.rank === 'commended') cp.appendChild(el('span', 'xtag', 'Highly commended'));
+        fg.appendChild(b); fg.appendChild(cp); grid.appendChild(fg); N.develop(im, (i % 8) * 70);
+      });
+      if (!reduce) feat.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 400, easing: N.ease });
+    }
+    select(want());
+    window.addEventListener('hashchange', function () { select(want()); });
+  })();
 
   /* ================= PANEL ================= */
   var PD = window.PANEL_DATA, host = $('#people');
