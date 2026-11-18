@@ -29,7 +29,15 @@
 
     /* hero pictures: round robin across events, starting at each event's second photo */
     var items = [], round = 1;
-    while (items.length < 6 && round < 8) {
+    /* photos chosen by hand in assets/js/slideshow.js take priority */
+    (window.NCD_SLIDES || []).forEach(function (s) {
+      if (!s || !s.folder || !s.file) return;
+      var ev = list.filter(function (e) { return e.slug === s.folder; })[0]; if (!ev) return;
+      var src = ev.photos.filter(function (u) { try { return decodeURIComponent(u.split('/').pop()) === s.file; } catch (e) { return false; } })[0];
+      if (src) items.push({ ev: s.caption || s.link ? { title: s.caption || ev.title, slug: ev.slug, href: s.link } : ev, src: src });
+    });
+    /* otherwise: round robin across events */
+    while (!items.length && items.length < 6 && round < 8) {
       list.forEach(function (ev) { if (items.length < 6 && ev.photos[round]) items.push({ ev: ev, src: ev.photos[round] }); });
       round++;
     }
@@ -83,7 +91,7 @@
     var kens = [];
 
     function label() {
-      capLink.textContent = items[cur].ev.title; capLink.href = 'photos.html#e=' + encodeURIComponent(items[cur].ev.slug);
+      capLink.textContent = items[cur].ev.title; capLink.href = items[cur].ev.href || 'photos.html#e=' + encodeURIComponent(items[cur].ev.slug);
       capNum.textContent = (cur + 1) + ' / ' + N_;
     }
     function ken(i) {
