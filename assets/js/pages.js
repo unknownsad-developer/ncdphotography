@@ -273,7 +273,7 @@
 
   /* ================= EXHIBITION ================= */
   if (page === 'exhibition' && window.EXHIBITION) (function () {
-    var X = window.EXHIBITION, months = X.months || [], openViewer = makeViewer();
+    var X = window.EXHIBITION, openViewer = makeViewer();
     var chips = $('#xchips'), feat = $('#feature'), grid = $('#xgrid'), count = $('#xcount'), chipEls = [], title = document.title;
     var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.2l7.1-.6z"/></svg>';
     var src = function (p) { return /^(https?:)?\//.test(p) ? p : encodeURI(p); };
@@ -284,6 +284,11 @@
     if (!X.formUrl) { var f = $('#xform'); f.hidden = false; f.textContent = 'The submission form link will be added here when the form is ready.'; }
     if (X.sample) { var n = $('#xnote'); n.hidden = false; n.textContent = 'Preview content: these are photos from our events, standing in for member entries until the first month opens.'; }
 
+    /* months come from assets/exhibition/data.json, which the approval automation keeps up to date */
+    fetch('assets/exhibition/data.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+      .then(function (d) { init(d.months && d.months.length ? d.months : (X.months || [])); });
+
+    function init(months) {
     if (!months.length) {
       feat.appendChild(el('p', 'xwin-none', 'No photos yet. Entries are open, and the first Picture of the month will appear here once the judges have chosen it.'));
       chips.hidden = true; grid.closest('section').hidden = true; return;
@@ -333,6 +338,7 @@
     }
     select(want());
     window.addEventListener('hashchange', function () { select(want()); });
+    }
   })();
 
   /* ================= PANEL ================= */
