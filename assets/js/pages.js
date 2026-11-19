@@ -284,7 +284,10 @@
     if (!X.formUrl) { var f = $('#xform'); f.hidden = false; f.textContent = 'The submission form link will be added here when the form is ready.'; }
     if (X.sample) { var n = $('#xnote'); n.hidden = false; n.textContent = 'Preview content: these are photos from our events, standing in for member entries until the first month opens.'; }
 
-    if (!months.length) { feat.appendChild(el('p', 'xwin-none', 'The first month of entries opens soon.')); return; }
+    if (!months.length) {
+      feat.appendChild(el('p', 'xwin-none', 'No photos yet. Entries are open, and the first Picture of the month will appear here once the judges have chosen it.'));
+      chips.hidden = true; grid.closest('section').hidden = true; return;
+    }
     months.forEach(function (m) {
       var b = el('button', 'chip', m.label); b.type = 'button'; b.dataset.id = m.id;
       b.addEventListener('click', function () { select(m.id); try { history.replaceState(null, '', '#m=' + encodeURIComponent(m.id)); } catch (e) {} });
