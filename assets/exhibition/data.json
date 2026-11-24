@@ -1,22 +1,3 @@
 {
-  "months": [
-    {
-      "id": "2026-11",
-      "label": "November 2026",
-      "photos": [
-        {
-          "src": "assets/exhibition/2026-11/20261119-224103-1.jpg",
-          "title": "Golden Sunset",
-          "by": "Md. Shoaib Al - Ahsan",
-          "rid": "20261119-224103"
-        },
-        {
-          "src": "assets/exhibition/2026-11/20261124-211819-1.jpg",
-          "title": "gta vi",
-          "by": "md shoaib",
-          "rid": "20261124-211819"
-        }
-      ]
-    }
-  ]
+  "months": []
 }
