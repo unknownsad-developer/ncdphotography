@@ -26,11 +26,17 @@
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px; --s12:48px; --s16:64px; --s24:96px; --s32:128px;
   --hdr:72px; --vp-wide:1280px;
   --ease:cubic-bezier(.16,1,.3,1);
+  /* page backdrop (dark): electric-blue night, vignette + fine grain */
+  --bg-art:radial-gradient(120% 100% at 50% 45%,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 100%),radial-gradient(60% 45% at 50% 118%,rgba(0,160,255,.75) 0%,rgba(0,160,255,0) 70%),radial-gradient(40% 45% at 100% 0%,rgba(0,230,255,.25) 0%,rgba(0,230,255,0) 70%),linear-gradient(180deg,#000308 0%,#01103a 50%,#02246a 100%);
+  --grain-op:.14; --grain-blend:overlay;
 }
 :root[data-theme="light"]{
   --bg:#EEF2F9; --surface:#FFFFFF; --surface-2:#E0E7F3; --text:#08122E; --muted:#47557A;
   --line:rgba(8,18,46,.16); --line-strong:rgba(8,18,46,.55);
   --accent:#8A6100; --accent-hover:#6B4A00; --accent-ink:#FFFFFF; --accent-text:#7A5500;
+  /* page backdrop (light): dawn mist, peach top-right + periwinkle bottom-left */
+  --bg-art:radial-gradient(70% 80% at 85% 0%,#ffd9b8 0%,rgba(255,217,184,0) 65%),radial-gradient(60% 70% at 0% 100%,#b9c8ee 0%,rgba(185,200,238,0) 65%),linear-gradient(180deg,#eef1f8 0%,#dfe5f3 100%);
+  --grain-op:.18; --grain-blend:multiply;
   color-scheme:light;
 }
 :root[data-theme="dark"],:root:not([data-theme]){color-scheme:dark}
@@ -38,7 +44,11 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--bg)}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--text);font:400 var(--body)/1.6 var(--f-body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+body{margin:0;color:var(--text);font:400 var(--body)/1.6 var(--f-body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+/* fixed backdrop (not background-attachment, which iOS ignores); html keeps var(--bg) as the fallback colour */
+body::before,body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none}
+body::before{background:var(--bg-art)}
+body::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:var(--grain-op);mix-blend-mode:var(--grain-blend)}
 h1,h2,h3,h4,p,ul,ol,dl,dd,figure,blockquote{margin:0}
 ul,ol{padding:0;list-style:none}
 img{max-width:100%}
