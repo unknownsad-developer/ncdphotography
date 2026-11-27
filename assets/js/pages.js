@@ -277,9 +277,11 @@
     var chips = $('#xchips'), feat = $('#feature'), grid = $('#xgrid'), count = $('#xcount'), chipEls = [], title = document.title;
     var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.2l7.1-.6z"/></svg>';
     var src = function (p) { return /^(https?:)?\//.test(p) ? p : encodeURI(p); };
+    var safeUrl = function (u) { try { var x = new URL(String(u)); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch (e) { return ''; } }; // blocks javascript: links from data.json
     var who = function (p) { return p.by ? p.by + (p.class ? ', ' + p.class : '') : ''; };
 
     if (X.closing) $('#xclose').textContent = 'The ' + X.closing + ' of each month';
+    X.formUrl = safeUrl(X.formUrl);
     [].forEach.call(document.querySelectorAll('[data-send]'), function (a) { if (X.formUrl) { a.href = X.formUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; } });
     if (!X.formUrl) { var f = $('#xform'); f.hidden = false; f.textContent = 'The submission form link will be added here when the form is ready.'; }
     if (X.sample) { var n = $('#xnote'); n.hidden = false; n.textContent = 'Preview content: these are photos from our events, standing in for member entries until the first month opens.'; }
@@ -321,7 +323,7 @@
         if (who(win)) t.appendChild(el('p', 'xby', 'Photo by ' + who(win)));
         if (win.story) t.appendChild(el('p', 'xstory', win.story));
         if (win.camera) t.appendChild(el('p', 'xmeta', 'Shot on ' + win.camera));
-        if (win.full) { var fl = el('a', 'textlink', 'View the full-quality original'); fl.href = win.full; fl.target = '_blank'; fl.rel = 'noopener noreferrer'; t.appendChild(fl); }
+        if (safeUrl(win.full)) { var fl = el('a', 'textlink', 'View the full-quality original'); fl.href = safeUrl(win.full); fl.target = '_blank'; fl.rel = 'noopener noreferrer'; t.appendChild(fl); }
         box.appendChild(wb); box.appendChild(t); feat.appendChild(box);
         N.develop(wi, 0);
       } else feat.appendChild(el('p', 'xwin-none', 'The Picture of the month for ' + m.label + ' will be announced on the 1st.'));
